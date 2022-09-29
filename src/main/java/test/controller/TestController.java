@@ -34,10 +34,16 @@ public class TestController {
 		eventAtendee.setEmail(params.get("email"));
 		eventAtendee.setRegistrationDate(new Date());
 		eventAtendee.setVerifiedGuest(false);
+		try {
 		testRepository.save(eventAtendee);
-		System.out.println(eventAtendee.toString()+ " - added");
 		resp.put("result", "success");
 		resp.put("entity", eventAtendee);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			resp.put("result", "fail");
+			resp.put("failMessage", "Error encountered during table insert : "+e.getMessage());
+		}
 		return resp;
 	}
 	
