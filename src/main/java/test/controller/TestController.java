@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,13 +26,14 @@ public class TestController {
 
 
 	@PostMapping("/addUser")
-	public Object addUser(@RequestParam Map<String,String> params) {
+	public Object addUser(@RequestParam Map<String,Object> params) {
 		Map <String,Object> resp = new HashMap<String,Object>();
 		EventAtendee eventAtendee = new EventAtendee();
-		eventAtendee.setEmployeeId(params.get("employeeId"));
-		eventAtendee.setEmployeeName(params.get("employeeName"));
-		eventAtendee.setDepartment(params.get("department"));
-		eventAtendee.setEmail(params.get("email"));
+		System.out.println(params.toString());
+		eventAtendee.setEmployeeId((String) params.get("employeeId"));
+		eventAtendee.setEmployeeName((String) params.get("employeeName"));
+		eventAtendee.setDepartment((String) params.get("department"));
+		eventAtendee.setEmail((String) params.get("email"));
 		eventAtendee.setRegistrationDate(new Date());
 		eventAtendee.setVerifiedGuest(false);
 		try {
@@ -44,6 +46,8 @@ public class TestController {
 			resp.put("result", "fail");
 			resp.put("failMessage", "Error encountered during table insert : "+e.getMessage());
 		}
+		resp.put("qrKey", encrypString(eventAtendee.getEmployeeName()));
+		System.out.println(resp.toString());
 		return resp;
 	}
 	
@@ -62,6 +66,20 @@ public class TestController {
 		testTable.forEach(System.out :: println);
 		return testTable.toString();
 	}
+	
+	public String encrypString(String encryptString) {
+		String seed = "encryptionPassword";
+		StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+		encryptor.setPassword(seed);
+		try {
+		encryptString = encryptor.encrypt(encryptString);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return encryptString;
+	}
+	
 	
 	
 
