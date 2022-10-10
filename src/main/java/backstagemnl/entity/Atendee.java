@@ -1,4 +1,4 @@
-package test.entity;
+package backstagemnl.entity;
 
 import java.util.Date;
 
@@ -13,8 +13,8 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "test_table")
-public class EventAtendee {
+@Table(name = "atendee_table")
+public class Atendee {
 
 	
 	@Id
