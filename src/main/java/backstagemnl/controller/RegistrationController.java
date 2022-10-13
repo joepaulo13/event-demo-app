@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import backstagemnl.entity.Atendee;
 import backstagemnl.repository.RegistrationRepository;
-import net.bytebuddy.asm.Advice.This;
 
 @RestController
 @RequestMapping("/registration")
@@ -25,7 +25,7 @@ public class RegistrationController {
 	@Autowired
 	private RegistrationRepository registrationRepository;
 
-	@Value("${jasyp.decryption.seed}")
+	@Value("${jasypt.decryption.seed}")
 	private String seed;
 
 	@PostMapping("/addUser")
@@ -40,34 +40,48 @@ public class RegistrationController {
 			atendee.setEmail((String) params.get("email"));
 			atendee.setRegistrationDate(new Date());
 			atendee.setVerifiedGuest(false);
+			atendee.setRaffleKey("UBQ".concat((String) params.get("employeeId")));
 			registrationRepository.save(atendee);
 			resp.put("result", "success");
 			resp.put("entity", atendee);
+			resp.put("qrKey", encryptString(atendee.getEmployeeId()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			resp.put("result", "fail");
 			resp.put("failMessage", "Error encountered during table insert : " + e.getMessage());
 		}
-		resp.put("qrKey", encryptString(atendee.getEmployeeId()));
 		System.out.println(resp.toString());
 		return resp;
 	}
 
-	@GetMapping("/getUser")
-	public Object getUser(String qrKey) {
+	@PostMapping("/validateUser")
+	public Object validateUser(@RequestBody Map<String, Object> params) {
+		String qrKey = (String) params.get("qrKey");
+		System.out.println("qrkey inputted = "+qrKey);
 		Map<String, Object> resp = new HashMap<String, Object>();
 		if (null==qrKey || qrKey.length()==0) {
 			System.out.println(this.getClass().getName()+" : qrKey field is blank");
 			resp.put("result", "fail");
 			resp.put("failMessage", "qrKey field is blank");
-			return resp;
 		}
-		
+		try {
 		String encryptedemployeeId = qrKey;
 		String employeeId = decryptString(encryptedemployeeId);
-		Atendee atendee = registrationRepository.findByEmployeeId(employeeId);
+		List<Atendee> atendee = registrationRepository.findByEmployeeId(employeeId);
 		System.out.println(this.getClass().getName()+" : Atendee details = " + atendee.toString());
+		if (null==atendee || atendee.size()!=1) {
+			resp.put("result", "fail");
+			resp.put("failMessage", "Error encountered during atendee validation");
+		}
+		resp.put("entity", atendee.get(0));
+		//TODO : add update atendee validation date code
 		return atendee;
+		} catch (Exception e) {
+			e.printStackTrace();
+			resp.put("result", "fail");
+			resp.put("failMessage", "Error encountered during atendee validation : " + e.getMessage());
+		}
+		return resp;
 	}
 
 	@GetMapping("/testApi")

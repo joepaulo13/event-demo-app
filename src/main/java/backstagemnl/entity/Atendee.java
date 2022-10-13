@@ -24,6 +24,9 @@ public class Atendee {
 	@Column(name = "employee_id")
 	private String employeeId;
 	
+	@Column(name = "raffle_key")
+	private String raffleKey;
+	
 	@Column(name = "employee_name")
 	private String employeeName;
 	
