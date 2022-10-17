@@ -34,8 +34,16 @@ public class RegistrationController {
 		Map<String, Object> resp = new HashMap<String, Object>();
 		Atendee atendee = new Atendee();
 		System.out.println(classname + " : " + params.toString());
+
 		try {
-			atendee.setEmployeeId((String) params.get("employeeId"));
+			String employeeID = (String) params.get("employeeId");
+			List<Atendee> existingAtendee = registrationRepository.findByEmployeeId(employeeID);
+			if (!existingAtendee.isEmpty()) {
+				resp.put("result", "fail");
+				resp.put("failMessage", "Employee "+employeeID+" is already registered");
+				return resp;
+			}
+			atendee.setEmployeeId(employeeID);
 			atendee.setEmployeeName((String) params.get("employeeName"));
 			atendee.setDepartment((String) params.get("department"));
 			atendee.setEmail((String) params.get("email"));
