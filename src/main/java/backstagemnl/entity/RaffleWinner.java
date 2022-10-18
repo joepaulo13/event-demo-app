@@ -7,12 +7,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import lombok.Data;
 
 @Entity
 @Data
-public class Raffle {
+@Table(name = "raffle_master")
+public class RaffleWinner {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,9 +40,6 @@ public class Raffle {
 	
 	@Column(name = "raffle_date")
 	private Date raffleDate;
-	
-	@Column(name = "verification_date")
-	private Date verificationDate;
 
 	
 }
