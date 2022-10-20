@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import backstagemnl.entity.Atendee;
@@ -40,7 +41,7 @@ public class RegistrationController {
 			List<Atendee> existingAtendee = registrationRepository.findByEmployeeId(employeeID);
 			if (!existingAtendee.isEmpty()) {
 				resp.put("result", "fail");
-				resp.put("failMessage", "Employee "+employeeID+" is already registered");
+				resp.put("failMessage", "Employee " + employeeID + " is already registered");
 				return resp;
 			}
 			atendee.setEmployeeId(employeeID);
@@ -84,19 +85,48 @@ public class RegistrationController {
 				resp.put("failMessage", "Employee details are not included in the registered employee masterlist");
 			} else {
 				int verify_count = registrationRepository.verifyAtendee(employeeId, new Date());
-				if (verify_count==1) {
+				if (verify_count == 1) {
 					registrationRepository.flush();
 					resp.put("result", "success");
 					resp.put("entity", registrationRepository.findByEmployeeId(employeeId).get(0));
 				} else {
 					resp.put("result", "fail");
-					resp.put("failMessage",classname + "Error encountered during atendee validation,try again.");
+					resp.put("failMessage", classname + "Error encountered during atendee validation,try again.");
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			resp.put("result", "fail");
 			resp.put("failMessage", "Error encountered during atendee validation : " + e.getMessage());
+		}
+		System.out.println(classname + " : response = " + resp.toString());
+		return resp;
+	}
+
+	@GetMapping("/regenerateQR")
+	public Object regenerateQR(@RequestParam(defaultValue = "") String employeeID) {
+		Map<String, Object> resp = new HashMap<String, Object>();
+		Atendee atendee = new Atendee();
+		if (null == employeeID || employeeID.isEmpty()) {
+			System.out.println(classname + " : employeeID field is blank");
+			resp.put("result", "fail");
+			resp.put("failMessage", "employeeID field is blank");
+			return resp;
+		}
+		try {
+			List<Atendee> existingAtendee = registrationRepository.findByEmployeeId(employeeID);
+			if (existingAtendee.isEmpty()) {
+				resp.put("result", "fail");
+				resp.put("failMessage", "Employee " + employeeID + " is not registered.");
+				return resp;
+			}
+			resp.put("result", "success");
+			resp.put("entity", existingAtendee.get(0));
+			resp.put("qrKey", encryptString(existingAtendee.get(0).getEmployeeId()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			resp.put("result", "fail");
+			resp.put("failMessage", "Error encountered for /regenerateQR : " + e.getMessage());
 		}
 		System.out.println(classname + " : response = " + resp.toString());
 		return resp;
