@@ -50,7 +50,7 @@ public class RegistrationController {
 			atendee.setEmail((String) params.get("email"));
 			atendee.setRegistrationDate(new Date());
 			atendee.setVerifiedGuest(false);
-			atendee.setRaffleKey("UBQ".concat((String) params.get("employeeId")));
+			atendee.setRaffleKey(employeeID);
 			registrationRepository.save(atendee);
 			resp.put("result", "success");
 			resp.put("entity", atendee);
