@@ -8,15 +8,19 @@ import java.util.Map;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import backstagemnl.entity.Atendee;
 import backstagemnl.repository.RegistrationRepository;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/registration")
@@ -24,6 +28,9 @@ public class RegistrationController {
 
 	@Autowired
 	private RegistrationRepository registrationRepository;
+
+	@Value("${bckstage.mnl.emailapi.base.url}")
+	private String emailAPIBaseUrl;
 
 	@Value("${jasypt.decryption.seed}")
 	private String seed;
@@ -51,10 +58,26 @@ public class RegistrationController {
 			atendee.setRegistrationDate(new Date());
 			atendee.setVerifiedGuest(false);
 			atendee.setRaffleKey(employeeID);
+
+			String qrkey = encryptString(atendee.getEmployeeId());
+			WebClient webclient = WebClient.create(emailAPIBaseUrl);
+			Map<String, String> apiCallJSON = new HashMap<>();
+			apiCallJSON.put("uid",qrkey);
+			apiCallJSON.put("email",atendee.getEmail());
+			apiCallJSON.put("displayName",atendee.getEmployeeName());
+
+			
+			webclient.post().uri("/createAuthUser")
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+					.body(Mono.just(apiCallJSON), Map.class)
+					.retrieve()
+					.bodyToMono(String.class)
+					.block();
+			
 			registrationRepository.save(atendee);
 			resp.put("result", "success");
 			resp.put("entity", atendee);
-			resp.put("qrKey", encryptString(atendee.getEmployeeId()));
+			resp.put("qrKey", qrkey);
 		} catch (Exception e) {
 			e.printStackTrace();
 			resp.put("result", "fail");
