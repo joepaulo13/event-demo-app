@@ -19,10 +19,11 @@ public interface RegistrationRepository extends JpaRepository<Atendee, Integer> 
 	@Transactional
 	@Modifying(clearAutomatically = true)
 	@Query(nativeQuery = true,
-			value = "update atendee_table set verification_date = :verificationDate, verified_guest = true where "
+			value = "update atendee_table set verification_date = :verificationDate, verified_guest = true, location = :location where "
 					+ "employee_id = :employeeId")
 	int verifyAtendee(
 			@Param("employeeId") String employeeId,
+			@Param("location") String location,
 			@Param("verificationDate") Date verificationDate);
 	
 	

@@ -55,6 +55,8 @@ public class RaffleController {
 					raffleWinner.setRaffleId((String) params.get("raffleID"));
 					raffleWinner.setEmployeeId(employeeID);
 					raffleWinner.setEmployeeName(registeredAtendee.get(0).getEmployeeName());
+					raffleWinner.setLocation(registeredAtendee.get(0).getLocation());
+					raffleWinner.setDepartment(registeredAtendee.get(0).getDepartment());
 					raffleWinner.setPrizeNumber((Integer) params.get("prizeNumber"));
 					raffleWinner.setPrizeDescription((String) params.get("prizeDescription"));
 					raffleWinner.setRaffleDate(new Date());

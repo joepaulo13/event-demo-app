@@ -33,6 +33,9 @@ public class Atendee {
 	@Column(name = "department")
 	private String department;
 	
+	@Column(name = "location")
+	private String location;
+	
 	@Column(name = "email_address")
 	private String email;
 	

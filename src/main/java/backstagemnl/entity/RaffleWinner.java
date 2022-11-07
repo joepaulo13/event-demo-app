@@ -27,9 +27,14 @@ public class RaffleWinner {
 	@Column(name = "employee_id")
 	private String employeeId;
 
-	
 	@Column(name = "employee_name")
 	private String employeeName;
+	
+	@Column(name = "department")
+	private String department;
+	
+	@Column(name = "location")
+	private String location;
 	
 	@Column(name = "prize_number")
 	private Integer prizeNumber;

@@ -8,19 +8,14 @@ import java.util.Map;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import backstagemnl.entity.Atendee;
 import backstagemnl.repository.RegistrationRepository;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/registration")
@@ -28,9 +23,6 @@ public class RegistrationController {
 
 	@Autowired
 	private RegistrationRepository registrationRepository;
-
-	@Value("${bckstage.mnl.emailapi.base.url}")
-	private String emailAPIBaseUrl;
 
 	@Value("${jasypt.decryption.seed}")
 	private String seed;
@@ -54,25 +46,26 @@ public class RegistrationController {
 			atendee.setEmployeeId(employeeID);
 			atendee.setEmployeeName((String) params.get("employeeName"));
 			atendee.setDepartment((String) params.get("department"));
+			atendee.setLocation((String) params.get("location"));
 			atendee.setEmail((String) params.get("email"));
 			atendee.setRegistrationDate(new Date());
 			atendee.setVerifiedGuest(false);
 			atendee.setRaffleKey(employeeID);
 
 			String qrkey = encryptString(atendee.getEmployeeId());
-			WebClient webclient = WebClient.create(emailAPIBaseUrl);
-			Map<String, String> apiCallJSON = new HashMap<>();
-			apiCallJSON.put("uid",qrkey);
-			apiCallJSON.put("email",atendee.getEmail());
-			apiCallJSON.put("displayName",atendee.getEmployeeName());
-
-			
-			webclient.post().uri("/createAuthUser")
-					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-					.body(Mono.just(apiCallJSON), Map.class)
-					.retrieve()
-					.bodyToMono(String.class)
-					.block();
+//			WebClient webclient = WebClient.create(emailAPIBaseUrl);
+//			Map<String, String> apiCallJSON = new HashMap<>();
+//			apiCallJSON.put("uid",qrkey);
+//			apiCallJSON.put("email",atendee.getEmail());
+//			apiCallJSON.put("displayName",atendee.getEmployeeName());
+//
+//			
+//			webclient.post().uri("/createAuthUser")
+//					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//					.body(Mono.just(apiCallJSON), Map.class)
+//					.retrieve()
+//					.bodyToMono(String.class)
+//					.block();
 			
 			registrationRepository.save(atendee);
 			resp.put("result", "success");
@@ -101,13 +94,14 @@ public class RegistrationController {
 		try {
 			String encryptedemployeeId = qrKey;
 			String employeeId = decryptString(encryptedemployeeId);
+			String verifiedLocation = "Sofitel";
 			List<Atendee> atendee = registrationRepository.findByEmployeeId(employeeId);
 			System.out.println(classname + " : Atendee details = " + atendee.toString());
 			if (null == atendee || atendee.size() != 1) {
 				resp.put("result", "fail");
 				resp.put("failMessage", "Employee details are not included in the registered employee masterlist");
 			} else {
-				int verify_count = registrationRepository.verifyAtendee(employeeId, new Date());
+				int verify_count = registrationRepository.verifyAtendee(employeeId, verifiedLocation, new Date());
 				if (verify_count == 1) {
 					registrationRepository.flush();
 					resp.put("result", "success");
