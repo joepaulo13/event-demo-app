@@ -1,3 +1,3 @@
 #!/bin/bash
 
-git checkout main;git fetch;git pull;git branch -D prod;git checkout -b prod;git cherry-pick ba36997564ae5bc5827a6f0f021761b7e4782944;
+git checkout main;git fetch;git pull;git branch -D prod;git checkout -b prod;git cherry-pick fcbd3b71aca67e70855eb42d72f2ad037694c309;
