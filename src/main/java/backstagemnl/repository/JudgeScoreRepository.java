@@ -32,4 +32,13 @@ public interface JudgeScoreRepository extends JpaRepository<JudgeScores, Integer
 
 	@Query(nativeQuery = true, value = "select * from judge_score order by candidate_number,criteria_number asc")
 	List<JudgeScores> getScoreList();
+	
+	@Query(nativeQuery = true, value = "select count(distinct judge_id) from judge_score")
+	int getDistinctJudgeCount();
+	
+	@Query(nativeQuery = true, value = "select distinct candidate_number from judge_score order by candidate_number asc ")
+	List<String> getDistinctCandidates();
+	
+	@Query(nativeQuery = true, value = "select candidate_score from judge_score where candidate_number = :candidate_number order by candidate_number asc ")
+	List<String> getCandidateScores(@Param("candidate_number") String candidateNumber);
 }

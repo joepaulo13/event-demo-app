@@ -48,7 +48,7 @@ public class ScoresController {
 				successMessage = "Succesfully added score for candidate " + candidateNumber;
 				resp.put("result", "success");
 				resp.put("successMessage", successMessage);
-				
+
 			} else {
 				int verifyUpdatecount = judgeScoreRepository.updateJudgeScore(candidateScore, candidateNumber,
 						criteriaNumber, judgeId);
@@ -83,8 +83,9 @@ public class ScoresController {
 			judgeScoreRepository.deleteExistingScore(candidateNumber, criteriaNumber, judgeId);
 			judgeScoreRepository.flush();
 			resp.put("result", "success");
-			resp.put("successMessage", "Succesfully deleted score of candidate " + candidateNumber+" for criteria "+criteriaNumber);
-			
+			resp.put("successMessage",
+					"Succesfully deleted score of candidate " + candidateNumber + " for criteria " + criteriaNumber);
+
 		} catch (Exception e) {
 			resp.put("result", "fail");
 			resp.put("failMessage", "Error encountered while deleting judge score : " + e.getMessage());
@@ -95,7 +96,24 @@ public class ScoresController {
 	@GetMapping("/getAverageScores")
 	public Object getAverageScores() {
 		Map<String, Object> resp = new HashMap<String, Object>();
-		// todo get average computation
+		try {
+		double distinctJudgeCount = (double) judgeScoreRepository.getDistinctJudgeCount();
+		List<String> distinctCandidateNumber = judgeScoreRepository.getDistinctCandidates();
+		for (String candidateNumber : distinctCandidateNumber) {
+			List<String> candidateScores = judgeScoreRepository.getCandidateScores(candidateNumber);
+			double totalScore = 0;
+			double averageScore = 0;
+			for (String candidateScore : candidateScores) {
+				totalScore += Double.parseDouble(candidateScore);
+			}
+			averageScore = totalScore/distinctJudgeCount;
+			resp.put(candidateNumber, averageScore);
+		}
+		}catch (Exception e) {
+			resp.put("result", "fail");
+			resp.put("failMessage", "Error encountered while getting Average Scores : " + e.getMessage());
+		}
+		System.out.println(resp);
 		return resp;
 	}
 
