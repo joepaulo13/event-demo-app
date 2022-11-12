@@ -78,9 +78,9 @@ public class RaffleController {
 	public Object getEmployeeList() {
 		Map<String, Object> resp = new HashMap<String, Object>();
 		try {
-		List<Atendee> atendeeList = registrationRepository.findAll();
-		System.out.println(classname + " : employeelist = " + atendeeList.toString());
-		resp.put("employeelist", atendeeList);
+		List<Atendee> raffleQualifiedList = registrationRepository.getRaffleQualifiedList();
+		System.out.println(classname + " : employeelist = " + raffleQualifiedList.toString());
+		resp.put("employeelist", raffleQualifiedList);
 		resp.put("result", "success");
 		}
 		catch (Exception e) {
@@ -107,5 +107,7 @@ public class RaffleController {
 		System.out.println(classname + " : response = " + resp.toString());
 		return resp;
 	}
+	
+
 
 }

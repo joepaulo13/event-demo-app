@@ -13,22 +13,20 @@ import backstagemnl.entity.Atendee;
 
 public interface RegistrationRepository extends JpaRepository<Atendee, Integer> {
 
-
 	List<Atendee> findByEmployeeId(String employeeId);
-	
+
 	@Transactional
 	@Modifying(clearAutomatically = true)
-	@Query(nativeQuery = true,
-			value = "update atendee_table set verification_date = :verificationDate, verified_guest = true, location = :location where "
-					+ "employee_id = :employeeId")
-	int verifyAtendee(
-			@Param("employeeId") String employeeId,
-			@Param("location") String location,
+	@Query(nativeQuery = true, value = "update atendee_table set verification_date = :verificationDate, verified_guest = true, location = :location where "
+			+ "employee_id = :employeeId")
+	int verifyAtendee(@Param("employeeId") String employeeId, @Param("location") String location,
 			@Param("verificationDate") Date verificationDate);
-	
-	
-	@Query(nativeQuery = true,
-			value = "select * from atendee_table where verified_guest = true and employee_id = :employeeId order by verification_date desc limit 1")
-	Atendee postverifyAtendee(
-			@Param("employeeId") String employeeId);
+
+	@Query(nativeQuery = true, value = "select * from atendee_table where verified_guest = true and employee_id = :employeeId order by verification_date desc limit 1")
+	Atendee postverifyAtendee(@Param("employeeId") String employeeId);
+
+	@Query(nativeQuery = true, value = "select * from atendee_table where lower(location) = 'onsite' or "
+			+ " (verified_guest = 'true' and lower(location) = lower('sofitel')) ")
+	List<Atendee> getRaffleQualifiedList();
+
 }
